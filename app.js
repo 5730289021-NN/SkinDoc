@@ -5,8 +5,7 @@ A simple echo bot for the Microsoft Bot Framework.
 var restify = require('restify');
 var builder = require('botbuilder');
 var botbuilder_azure = require("botbuilder-azure");
-var request = require('request');
-var querystring = require('querystring');
+var needle = require('needle');
 
 // Setup Restify Server
 var server = restify.createServer();
@@ -30,11 +29,19 @@ server.post('/api/messages', connector.listen());
 // Create your bot with a function to receive messages from the user
 var bot = new builder.UniversalBot(connector, function (session) {
     var msg = session.message;
+    var options = {
+        headers: { 'Prediction-Key': '9ba907306c8740cea52aabd508df5c94',
+                   'Content-Type': 'application/json'}
+    }
+    var data = {
+        Url: 'https://cdn.pixabay.com/photo/2013/04/06/11/50/image-editing-101040_960_720.jpg'
+    }
     if (msg.attachments && msg.attachments.length > 0) {
      // Echo back attachment
     //var attachment = msg.attachments[0];
     //var form = { Url: msg.attachments. };
     //var formData = querystring.stringify(forasm);
+    /*
     request({
         header: {
             'Prediction-Key' : '9ba907306c8740cea52aabd508df5c94',
@@ -46,6 +53,10 @@ var bot = new builder.UniversalBot(connector, function (session) {
     }, function (err, res, body){
         console.log(body);
 
+    });
+    */
+    needle.post('https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/1ad8ba80-bd73-4e09-b185-260423589f69/url', data, options, function(err, resp) {
+        session.send(resp);
     });
     } else {
         // Echo back users text

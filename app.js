@@ -34,7 +34,7 @@ var bot = new builder.UniversalBot(connector, function (session) {
      // Echo back attachment
     //var attachment = msg.attachments[0];
     //var form = { Url: msg.attachments. };
-    var formData = querystring.stringify(form);
+    //var formData = querystring.stringify(form);
     request({
         header: {
             'Prediction-Key' : '9ba907306c8740cea52aabd508df5c94',

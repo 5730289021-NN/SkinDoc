@@ -1,80 +1,101 @@
-// Api = require('./api');
-/*-----------------------------------------------------------------------------
-A simple echo bot for the Microsoft Bot Framework. 
------------------------------------------------------------------------------*/
+// This loads the environment variables from the .env file
+require('dotenv-extended').load();
 
-var restify = require('restify');
+fetch = require('node-fetch');
+
 var builder = require('botbuilder');
-var botbuilder_azure = require("botbuilder-azure");
+var restify = require('restify');
+var Promise = require('bluebird');
+var request = require('request-promise').defaults({ encoding: null });
 
 // Setup Restify Server
 var server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3978, function () {
-   console.log('%s listening to %s', server.name, server.url); 
-});
-  
-// Create chat connector for communicating with the Bot Framework Service
-var connector = new builder.ChatConnector({
-    appId: process.env.MicrosoftAppId,
-    appPassword: process.env.MicrosoftAppPassword,
-    openIdMetadata: process.env.BotOpenIdMetadata
+    console.log('%s listening to %s', server.name, server.url);
 });
 
-// Listen for messages from users 
+// Create chat bot
+var connector = new builder.ChatConnector({
+    appId: process.env.MICROSOFT_APP_ID,
+    appPassword: process.env.MICROSOFT_APP_PASSWORD
+});
+
+// Listen for messages
 server.post('/api/messages', connector.listen());
 
-/*----------------------------------------------------------------------------------------
-* Bot Storage: This is a great spot to register the private state storage for your bot. 
-* We provide adapters for Azure Table, CosmosDb, SQL Azure, or you can implement your own!
-* For samples and documentation, see: https://github.com/Microsoft/BotBuilder-Azure
-* ---------------------------------------------------------------------------------------- */
+var bot = new builder.UniversalBot(connector, function (session) {
 
-var tableName = 'botdata';
-var azureTableClient = new botbuilder_azure.AzureTableClient(tableName, process.env['AzureWebJobsStorage']);
-var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azureTableClient);
-
-//var pictureUrl="http://www.9thaihealth.com/wp-content/uploads/2014/07/%E0%B9%82%E0%B8%A3%E0%B8%84%E0%B8%AB%E0%B8%B4%E0%B8%941.jpg";
-
-// Create your bot with a function to receive messages from the user
-var bot = new builder.UniversalBot(connector);
-bot.set('storage', tableStorage);
-
-bot.dialog('/', function (session) {
     var msg = session.message;
-    //msg.attachments=pictureUrl;
-    if (msg.attachments && msg.attachments.length > 0) {
-     // Echo back attachment
-     var attachment = msg.attachments[0];
-        session.send({
-            text: fetch(attachment.contentUrl),
-            // attachments: [
-            //     {
-            //         contentType: attachment.contentType,
-            //         contentUrl: attachment.contentUrl,
-            //         name: attachment.name
-            //     }
-            // ]
-        });
+    if (msg.attachments.length) {
+
+        // Message with attachment, proceed to download it.
+        // Skype & MS Teams attachment URLs are secured by a JwtToken, so we need to pass the token from our bot.
+        var attachment = msg.attachments[0];
+        var fileDownload = checkRequiresToken(msg)
+            ? requestWithToken(attachment.contentUrl)
+            : request(attachment.contentUrl);
+        api = api("https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/1ad8ba80-bd73-4e09-b185-260423589f69/url","http://www.9thaihealth.com/wp-content/uploads/2014/07/%E0%B9%82%E0%B8%A3%E0%B8%8" +
+            "4%E0%B8%AB%E0%B8%B4%E0%B8%941.jpg").then(
+                console.log(api.toString,'api')
+            )
+        
+        fileDownload.then(
+            function (response) {
+                
+                // Send reply with attachment type & size
+                var reply = new builder.Message(session)
+                    .text('Attachment of %s type and size of %s bytes received.', attachment.contentType, response.length);
+                session.send(reply);
+
+            }).catch(function (err) {
+                console.log('Error downloading attachment:', { statusCode: err.statusCode, message: err.response.statusMessage });
+            });
+
     } else {
-        // Echo back users text
-        session.send("SkinDoc said: %s", session.message.text);
+
+        // No attachments were sent
+        var reply = new builder.Message(session)
+            .text('Hi there! This sample is intented to show how can I receive attachments but no attachment was sent to me. Please try again sending a new message with an attachment.');
+        session.send(reply);
     }
+
 });
 
+// Request file with Authentication Header
+var requestWithToken = function (url) {
+    return obtainToken().then(function (token) {
+        return request({
+            url: url,
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/octet-stream'
+            }
+        });
+    });
+};
 
+// Promise for obtaining JWT Token (requested once)
+var obtainToken = Promise.promisify(connector.getAccessToken.bind(connector));
 
-function fetch(url) {
-    fetch("https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/1ad8ba80-bd73-4e09-b185-260423589f69/url", {
-            method: 'post',
-            body: JSON.stringify({
-                Url:url
-            })
+var checkRequiresToken = function (message) {
+    return message.source === 'skype' || message.source === 'msteams';
+};
+
+async function api(url,picUrl) {
+     fetch(url, {
+        method: 'post',
+
+        headers: {
+            'Prediction-Key': '9ba907306c8740cea52aabd508df5c94',
+            'content-type': 'application/json'
+        },
+            body: JSON.stringify({Url: picUrl})
         })
         .then(function (response) {
             return response.json();
         })
         .then(function (data) {
+            console.log(data);
             return data;
         });
 }
-

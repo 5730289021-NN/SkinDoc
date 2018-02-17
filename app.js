@@ -24,11 +24,13 @@ var connector = new builder.ChatConnector({
 server.post('/api/messages', connector.listen());
 
 var bot = new builder.UniversalBot(connector, async function (session) {
+    
 
     var msg = session.message;
+    //console.log(msg,'msg')
     if (msg.attachments.length) {
-
-        var output = await api('https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/1ad8ba80-bd73-4e09-b185-260423589f69/url','https://www.w3schools.com/w3css/img_lights.jpg')
+        console.log(msg.attachments,'atachment');
+        var output = await api('https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/1ad8ba80-bd73-4e09-b185-260423589f69/url',msg.attachments[0].contentUrl);
         console.log(output,'++++++++++++++++++');
         // Message with attachment, proceed to download it.
         // Skype & MS Teams attachment URLs are secured by a JwtToken, so we need to pass the token from our bot.

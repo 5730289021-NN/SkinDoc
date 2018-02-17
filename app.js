@@ -53,6 +53,6 @@ bot.dialog('/', function (session) {
         });
     } else {
         // Echo back users text
-        session.send("You said: %s", session.message.text);
+        session.send("SkinDoc said: %s", session.message.text);
     }
 });

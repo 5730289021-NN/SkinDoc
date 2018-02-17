@@ -33,7 +33,7 @@ var bot = new builder.UniversalBot(connector, function (session) {
     if (msg.attachments && msg.attachments.length > 0) {
      // Echo back attachment
     var attachment = msg.attachments[0];
-    var form = { Url: attachment.contentUrl };
+    var form = { Url: 'https://images.pexels.com/photos/416160/pexels-photo-416160.jpeg?w=940&h=650&auto=compress&cs=tinysrgb' };
     var formData = querystring.stringify(form);
     request({
         header: {
@@ -47,17 +47,6 @@ var bot = new builder.UniversalBot(connector, function (session) {
         console.log(res);
         console.log(body);
     });
-        /*session.send({
-            text: "You sent:",
-            attachments: [
-                {
-                    contentType: attachment.contentType,
-                    contentUrl: attachment.contentUrl,
-                    name: attachment.name
-                }
-            ]
-        });*/
-
     } else {
         // Echo back users text
         session.send("You said: %s", session.message.text);

@@ -57,6 +57,7 @@ var bot = new builder.UniversalBot(connector, function (session) {
     */
     needle.post('https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/1ad8ba80-bd73-4e09-b185-260423589f69/url', data, options, function(err, resp) {
         session.send(resp);
+        console.log(resp)
     });
     } else {
         // Echo back users text

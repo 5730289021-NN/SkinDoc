@@ -1,3 +1,4 @@
+// Api = require('./api');
 /*-----------------------------------------------------------------------------
 A simple echo bot for the Microsoft Bot Framework. 
 -----------------------------------------------------------------------------*/
@@ -32,27 +33,48 @@ var tableName = 'botdata';
 var azureTableClient = new botbuilder_azure.AzureTableClient(tableName, process.env['AzureWebJobsStorage']);
 var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azureTableClient);
 
+//var pictureUrl="http://www.9thaihealth.com/wp-content/uploads/2014/07/%E0%B9%82%E0%B8%A3%E0%B8%84%E0%B8%AB%E0%B8%B4%E0%B8%941.jpg";
+
 // Create your bot with a function to receive messages from the user
 var bot = new builder.UniversalBot(connector);
 bot.set('storage', tableStorage);
 
 bot.dialog('/', function (session) {
     var msg = session.message;
+    //msg.attachments=pictureUrl;
     if (msg.attachments && msg.attachments.length > 0) {
      // Echo back attachment
      var attachment = msg.attachments[0];
         session.send({
-            text: "You sent:",
-            attachments: [
-                {
-                    contentType: attachment.contentType,
-                    contentUrl: attachment.contentUrl,
-                    name: attachment.name
-                }
-            ]
+            text: fetch(attachment.contentUrl),
+            // attachments: [
+            //     {
+            //         contentType: attachment.contentType,
+            //         contentUrl: attachment.contentUrl,
+            //         name: attachment.name
+            //     }
+            // ]
         });
     } else {
         // Echo back users text
         session.send("SkinDoc said: %s", session.message.text);
     }
 });
+
+
+
+function fetch(url) {
+    fetch("https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/1ad8ba80-bd73-4e09-b185-260423589f69/url", {
+            method: 'post',
+            body: JSON.stringify({
+                Url:url
+            })
+        })
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (data) {
+            return data;
+        });
+}
+

@@ -46,7 +46,18 @@ bot.dialog('/', function (session) {
      // Echo back attachment
      var attachment = msg.attachments[0];
         session.send({
-            text: fetch(attachment.contentUrl),
+            text: fetch("https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/1ad8ba80-bd73-4e09-b185-260423589f69/url", {
+                method: 'post',
+                body: JSON.stringify({
+                    Url:url
+                })
+            })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+                return data;
+            })
             // attachments: [
             //     {
             //         contentType: attachment.contentType,
@@ -60,21 +71,4 @@ bot.dialog('/', function (session) {
         session.send("SkinDoc said: %s", session.message.text);
     }
 });
-
-
-
-function fetch(url) {
-    fetch("https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/1ad8ba80-bd73-4e09-b185-260423589f69/url", {
-            method: 'post',
-            body: JSON.stringify({
-                Url:url
-            })
-        })
-        .then(function (response) {
-            return response.json();
-        })
-        .then(function (data) {
-            return data;
-        });
-}
 

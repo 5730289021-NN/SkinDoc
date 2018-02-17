@@ -1,4 +1,3 @@
-// Api = require('./api');
 /*-----------------------------------------------------------------------------
 A simple echo bot for the Microsoft Bot Framework. 
 -----------------------------------------------------------------------------*/
@@ -6,7 +5,7 @@ A simple echo bot for the Microsoft Bot Framework.
 var restify = require('restify');
 var builder = require('botbuilder');
 var botbuilder_azure = require("botbuilder-azure");
-var fetch = require('node-fetch')
+var request = require('request');
 
 // Setup Restify Server
 var server = restify.createServer();
@@ -34,7 +33,12 @@ var tableName = 'botdata';
 var azureTableClient = new botbuilder_azure.AzureTableClient(tableName, process.env['AzureWebJobsStorage']);
 var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azureTableClient);
 
-//var pictureUrl="http://www.9thaihealth.com/wp-content/uploads/2014/07/%E0%B9%82%E0%B8%A3%E0%B8%84%E0%B8%AB%E0%B8%B4%E0%B8%941.jpg";
+var url = 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/1ad8ba80-bd73-4e09-b185-260423589f69/url';
+var headers = { 
+    'Prediction-Key': '9ba907306c8740cea52aabd508df5c94',
+    'Content-Type' : 'application/json' 
+};
+
 
 // Create your bot with a function to receive messages from the user
 var bot = new builder.UniversalBot(connector);
@@ -42,34 +46,21 @@ bot.set('storage', tableStorage);
 
 bot.dialog('/', function (session) {
     var msg = session.message;
-    //msg.attachments=pictureUrl;
     if (msg.attachments && msg.attachments.length > 0) {
      // Echo back attachment
-     var attachment = msg.attachments[0];
-        session.send({
-            text: fetch("https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/1ad8ba80-bd73-4e09-b185-260423589f69/url", {
-                method: 'post',
-                body: JSON.stringify({
-                    Url:url
-                })
-            })
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (data) {
-                return data;
-            })
-            // attachments: [
-            //     {
-            //         contentType: attachment.contentType,
-            //         contentUrl: attachment.contentUrl,
-            //         name: attachment.name
-            //     }
-            // ]
-        });
+        request.post(
+            {
+                url : url,
+                headers: headers
+            },
+            function (error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    session.send({text: body});
+                }
+            }
+        );
     } else {
         // Echo back users text
-        session.send("SkinDoc said: %s", session.message.text);
+        session.send("Skin said: %s", session.message.text);
     }
 });
-

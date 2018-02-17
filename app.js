@@ -23,28 +23,26 @@ var connector = new builder.ChatConnector({
 // Listen for messages
 server.post('/api/messages', connector.listen());
 
-var bot = new builder.UniversalBot(connector, function (session) {
+var bot = new builder.UniversalBot(connector, async function (session) {
 
     var msg = session.message;
     if (msg.attachments.length) {
 
+        var output = await api('https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/1ad8ba80-bd73-4e09-b185-260423589f69/url','https://www.w3schools.com/w3css/img_lights.jpg')
+        console.log(output,'++++++++++++++++++');
         // Message with attachment, proceed to download it.
         // Skype & MS Teams attachment URLs are secured by a JwtToken, so we need to pass the token from our bot.
         var attachment = msg.attachments[0];
         var fileDownload = checkRequiresToken(msg)
             ? requestWithToken(attachment.contentUrl)
             : request(attachment.contentUrl);
-        api = api("https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/1ad8ba80-bd73-4e09-b185-260423589f69/url","http://www.9thaihealth.com/wp-content/uploads/2014/07/%E0%B9%82%E0%B8%A3%E0%B8%8" +
-            "4%E0%B8%AB%E0%B8%B4%E0%B8%941.jpg").then(
-                console.log(api.toString,'api')
-            )
         
         fileDownload.then(
             function (response) {
                 
                 // Send reply with attachment type & size
                 var reply = new builder.Message(session)
-                    .text('Attachment of %s type and size of %s bytes received.', attachment.contentType, response.length);
+                    .text('Attachment of %s type and size of %s bytes received. %s %s', attachment.contentType, response.length,JSON.stringify(output));
                 session.send(reply);
 
             }).catch(function (err) {
@@ -81,8 +79,8 @@ var checkRequiresToken = function (message) {
     return message.source === 'skype' || message.source === 'msteams';
 };
 
-async function api(url,picUrl) {
-     fetch(url, {
+function api(url,picUrl) {
+     return fetch(url, {
         method: 'post',
 
         headers: {
@@ -95,7 +93,6 @@ async function api(url,picUrl) {
             return response.json();
         })
         .then(function (data) {
-            console.log(data);
             return data;
         });
 }

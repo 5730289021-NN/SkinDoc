@@ -42,7 +42,7 @@ var bot = new builder.UniversalBot(connector, function (session) {
         },
         uri: 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/1ad8ba80-bd73-4e09-b185-260423589f69/url',
         body: formData,
-        method: 'POST'
+        method: 'GET'
     }, function (err, res, body){
         console.log(res);
         console.log(body);

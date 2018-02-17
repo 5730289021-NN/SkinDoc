@@ -11,7 +11,6 @@ var request = require('request');
 var server = restify.createServer();
 server.listen(process.env.port || process.env.PORT || 3978, function () {
    console.log('%s listening to %s', server.name, server.url);
-   console.log("sent-2")
 });
   
 // Create chat connector for communicating with the Bot Framework Service
@@ -44,19 +43,39 @@ var body = {
     'Url' : 'http://www.moronface.com/make-pictures/funny-pictures-2010-2/dddd1-34982.jpg'
 }
 
-console.log("sent-31")
 
 // Create your bot with a function to receive messages from the user
+/*
 var bot = new builder.UniversalBot(connector);
 bot.set('storage', tableStorage);
-console.log("sent-11")
+*/
+
+var bot = new builder.UniversalBot(connector, function (session) {
+    var msg = session.message;
+    if (msg.attachments && msg.attachments.length > 0) {
+     // Echo back attachment
+     var attachment = msg.attachments[0];
+        session.send({
+            text: "You sent:",
+            attachments: [
+                {
+                    contentType: attachment.contentType,
+                    contentUrl: attachment.contentUrl,
+                    name: attachment.name
+                }
+            ]
+        });
+    } else {
+        // Echo back users text
+        session.send("You said: %s", session.message.text);
+    }
+});
+/*
 
 bot.dialog('/', function (session) {
     var msg = session.message;
-    console.log("sent0")
     if (msg.attachments && msg.attachments.length > 0) {
      // Echo back attachment
-     console.log("sent1")
         request.post(
             {
                 url : url,
@@ -66,16 +85,12 @@ bot.dialog('/', function (session) {
             function (error, response, body) {
                 if (!error && response.statusCode == 200) {
                     session.send({text: body});
-                    console.log("sent2")
                 }
             }
         );
-        console.log("sent3")
     } else {
-        console.log("sent4")
         // Echo back users text
         session.send("Skin said: %s", session.message.text);
-        console.log("sent5")
     }
-    console.log("sent6")
 });
+*/

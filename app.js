@@ -32,8 +32,8 @@ var bot = new builder.UniversalBot(connector, function (session) {
     var msg = session.message;
     if (msg.attachments && msg.attachments.length > 0) {
      // Echo back attachment
-    var attachment = msg.attachments[0];
-    var form = { Url: 'https://images.pexels.com/photos/416160/pexels-photo-416160.jpeg?w=940&h=650&auto=compress&cs=tinysrgb' };
+    //var attachment = msg.attachments[0];
+    //var form = { Url: msg.attachments. };
     var formData = querystring.stringify(form);
     request({
         header: {
@@ -41,11 +41,11 @@ var bot = new builder.UniversalBot(connector, function (session) {
             'Content-Type' : 'application/json'
         },
         uri: 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/1ad8ba80-bd73-4e09-b185-260423589f69/url',
-        body: formData,
+        body: msg.attachments[0].contentUrl,
         method: 'GET'
     }, function (err, res, body){
-        console.log(res);
         console.log(body);
+
     });
     } else {
         // Echo back users text

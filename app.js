@@ -41,7 +41,7 @@ var bot = new builder.UniversalBot(connector, function (session) {
             'Content-Type' : 'application/json'
         },
         uri: 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/1ad8ba80-bd73-4e09-b185-260423589f69/url',
-        body: msg.attachments[0].contentUrl,
+        body: {Url : 'https://cdn.pixabay.com/photo/2013/04/06/11/50/image-editing-101040_960_720.jpg'},
         method: 'POST'
     }, function (err, res, body){
         console.log(body);

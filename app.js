@@ -34,7 +34,7 @@ var bot = new builder.UniversalBot(connector, function (session) {
      // Echo back attachment
     //var attachment = msg.attachments[0];
     //var form = { Url: msg.attachments. };
-    //var formData = querystring.stringify(form);
+    //var formData = querystring.stringify(forasm);
     request({
         header: {
             'Prediction-Key' : '9ba907306c8740cea52aabd508df5c94',
@@ -42,7 +42,7 @@ var bot = new builder.UniversalBot(connector, function (session) {
         },
         uri: 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/1ad8ba80-bd73-4e09-b185-260423589f69/url',
         body: msg.attachments[0].contentUrl,
-        method: 'GET'
+        method: 'POST'
     }, function (err, res, body){
         console.log(body);
 

@@ -44,7 +44,8 @@ var bot = new builder.UniversalBot(connector, function (session) {
         body: formData,
         method: 'POST'
     }, function (err, res, body){
-        console.log(res)
+        console.log(res);
+        console.log(body);
     });
         /*session.send({
             text: "You sent:",

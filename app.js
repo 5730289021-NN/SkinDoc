@@ -1,6 +1,19 @@
 // This loads the environment variables from the .env file
 require('dotenv-extended').load();
 
+var azure = require('botbuilder-azure');
+
+var documentDbOptions = {
+    host: 'https://poj.documents.azure.com:443/', 
+    masterKey: 'UqPjo2vPVNcBilVdV7RvTvHB9Kf2a9XO4AYlF91Tec1zfoZxavut7Owpwd0MH3gfV0PcUOuL1z8m5c5MyrUsKw==', 
+    database: 'botdocs',   
+    collection: 'botdata'
+};
+
+var docDbClient = new azure.DocumentDbClient(documentDbOptions);
+
+var cosmosStorage = new azure.AzureBotStorage({ gzipData: false }, docDbClient);
+
 fetch = require('node-fetch');
 
 var builder = require('botbuilder');
@@ -58,7 +71,7 @@ var bot = new builder.UniversalBot(connector, function (session) {
                             message: err.response.statusMessage
                         });
                     });
-        })
+        });
             
                 
             
@@ -76,7 +89,7 @@ var bot = new builder.UniversalBot(connector, function (session) {
         session.send(reply);
     }
 
-});
+}).set('storage', cosmosStorage);
 
 // Request file with Authentication Header
 var requestWithToken = function (url) {
